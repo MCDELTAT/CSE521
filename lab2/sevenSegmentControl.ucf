@@ -1,0 +1,16 @@
+##------------------------------------
+## Seven Segment Display Definition
+##------------------------------------
+NET "segA" LOC = "E14";
+NET "segB" LOC = "G13";
+NET "segC" LOC = "N15";
+NET "segD" LOC = "P15";
+NET "segE" LOC = "R16";
+NET "segF" LOC = "F13";
+NET "segG" LOC = "N16";
+NET "segDP" LOC = "P16";
+#Segment Selectors (Enable)
+NET "sel1" LOC = "E13";
+NET "sel2" LOC = "F14";
+NET "sel3" LOC = "G14";
+NET "sel4" LOC = "D14";

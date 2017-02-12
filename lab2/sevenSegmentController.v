@@ -21,29 +21,26 @@
 module sevenSegmentController(
 	input wire clk, en, dir,
 	output reg [3:0] display_enable,
-	output reg [7:0] data 
+	output reg [7:0] data
 );
 
 wire new_clock;
-reg [2:0] count = 3'b000;
+wire [2:0] state;
 
 freq_divider freq1 (
 	.clk (clk),
 	.new_clk (new_clock)
 );
 
-// Insert a frequency divider here as needed
-always @(posedge new_clock)
-	if (en)
-		if (!dir)
-			//increment until full saturation, then reset to zero
-			count = (count==3'b111) ? 0:(count+1);
-		else if (dir)
-			//decrement until no saturation, then reset to full saturation
-			count = (count==3'b000) ? 3'b111:(count-1);
+counter count1 (
+	.clk (new_clock),
+	.en (en),
+	.dir (dir),
+	.count (state)
+);
 
 always @(posedge new_clock)
-	case(count)
+	case(state)
 		3'b000 : begin
 						data = 8'b00111001; // top box
 						display_enable = 4'b0111;

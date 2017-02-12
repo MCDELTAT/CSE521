@@ -25,6 +25,10 @@ module counter(
 	output reg [2:0] count // 8 states
 );
 
+initial begin
+	count = 0;
+end
+
 always @(posedge clk)
 	if (en)
 		if (!dir)

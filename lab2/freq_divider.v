@@ -23,20 +23,19 @@ module freq_divider(
 	 output reg new_clk
 );
 
-reg [25:0] count;
+reg [24:0] count;
 
 initial begin
 	count = 0;
 end
 
-always@(posedge clk)
-	begin
-		count <= count+1;
-	end
-
-always@*
-	begin
-		new_clk = (count==0) ? 1:0;
-	end	
+always@(posedge clk) begin
+	if (count == 0) begin
+        count <= 24999999;
+        new_clk <= ~new_clk;
+    end else begin
+        count <= count - 1;
+    end
+end
 
 endmodule

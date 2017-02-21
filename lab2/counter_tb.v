@@ -41,6 +41,12 @@ module counter_tb;
 	);
 
 	initial begin
+		forever begin
+			#10 clk = ~clk;
+		end
+	end
+
+	initial begin
 		// Initialize Inputs
 		clk = 0;
 		en = 0;
@@ -49,12 +55,12 @@ module counter_tb;
 		// Wait 100 ns for global reset to finish
 		#100;
         
-		// Add stimulus here
+		// Start counting up (clockwise)
 		en = 1;
 		
-		forever begin
-			#10 clk = ~clk;
-		end
+		// Reverse direction 
+		#150;
+		dir = 1;
 		
 	end
       

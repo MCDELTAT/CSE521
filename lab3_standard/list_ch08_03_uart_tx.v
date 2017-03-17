@@ -13,12 +13,11 @@ module uart_tx
    );
 
    // symbolic state declaration
-   localparam [2:0]
-      idle  = 3'b000,
-      start = 3'b001,
-      data  = 3'b010,
-      paritySend = 3'b011,
-		stop = 3'b100;
+   localparam [1:0]
+      idle  = 2'b00,
+      start = 2'b01,
+      data  = 2'b10,
+      stop  = 2'b11;
 
    // signal declaration
    reg [1:0] state_reg, state_next;
@@ -26,7 +25,6 @@ module uart_tx
    reg [2:0] n_reg, n_next;
    reg [7:0] b_reg, b_next;
    reg tx_reg, tx_next;
-	reg dataParity_reg, dataParity_next;
 
    // body
    // FSMD state & data registers
@@ -38,7 +36,6 @@ module uart_tx
             n_reg <= 0;
             b_reg <= 0;
             tx_reg <= 1'b1;
-				dataParity_reg <= 0;
          end
       else
          begin
@@ -47,7 +44,6 @@ module uart_tx
             n_reg <= n_next;
             b_reg <= b_next;
             tx_reg <= tx_next;
-				dataParity_reg <= dataParity_next;
          end
 
    // FSMD next-state logic & functional units
@@ -58,7 +54,7 @@ module uart_tx
       s_next = s_reg;
       n_next = n_reg;
       b_next = b_reg;
-      tx_next = tx_reg;
+      tx_next = tx_reg ;
       case (state_reg)
          idle:
             begin
@@ -86,32 +82,19 @@ module uart_tx
          data:
             begin
                tx_next = b_reg[0];
-					dataParity_next = dataParity_reg ^ b_reg[0];
                if (s_tick)
                   if (s_reg==15)
                      begin
                         s_next = 0;
                         b_next = b_reg >> 1;
                         if (n_reg==(DBIT-1))
-                           state_next = paritySend;
+                           state_next = stop ;
                         else
                            n_next = n_reg + 1;
                      end
                   else
                      s_next = s_reg + 1;
             end
-			paritySend:
-				begin
-					if (s_tick)
-						if(s_reg==15)
-							begin
-								s_next = 0;
-								tx_next = dataParity_reg;
-								state_next = stop;
-							end
-						else
-							s_next = s_reg + 1;
-				end
          stop:
             begin
                tx_next = 1'b1;

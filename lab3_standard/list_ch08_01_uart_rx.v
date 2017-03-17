@@ -8,25 +8,21 @@ module uart_rx
     input wire clk, reset,
     input wire rx, s_tick,
     output reg rx_done_tick,
-    output wire [7:0] dout,
-	 output reg parityMatch
+    output wire [7:0] dout
    );
 
    // symbolic state declaration
-   localparam [2:0]
-      idle  = 3'b000,
-      start = 3'b001,
-      data  = 3'b010,
-      parityCheck  = 3'b011,
-		stop = 3'b100;
+   localparam [1:0]
+      idle  = 2'b00,
+      start = 2'b01,
+      data  = 2'b10,
+      stop  = 2'b11;
 
    // signal declaration
    reg [1:0] state_reg, state_next;
    reg [3:0] s_reg, s_next;
    reg [2:0] n_reg, n_next;
    reg [7:0] b_reg, b_next;
-	reg dataParity_reg, dataParity_next;
-	reg parity;
 
    // body
    // FSMD state & data registers
@@ -37,8 +33,6 @@ module uart_rx
             s_reg <= 0;
             n_reg <= 0;
             b_reg <= 0;
-				dataParity_reg <= 0;
-				parity <= 0;
          end
       else
          begin
@@ -46,7 +40,6 @@ module uart_rx
             s_reg <= s_next;
             n_reg <= n_next;
             b_reg <= b_next;
-				dataParity_reg <= dataParity_next;
          end
 
    // FSMD next-state logic
@@ -57,7 +50,6 @@ module uart_rx
       s_next = s_reg;
       n_next = n_reg;
       b_next = b_reg;
-		// add dataParity here?
       case (state_reg)
          idle:
             if (~rx)
@@ -81,29 +73,13 @@ module uart_rx
                   begin
                      s_next = 0;
                      b_next = {rx, b_reg[7:1]};
-							dataParity_next = dataParity_reg ^ rx;
                      if (n_reg==(DBIT-1))
-                        state_next = parityCheck;
+                        state_next = stop ;
                       else
                         n_next = n_reg + 1;
                    end
                else
                   s_next = s_reg + 1;
-			parityCheck: 
-				if (s_tick)
-					if (s_reg==15)
-						begin
-							s_next = 0;
-							parity = rx;
-							// compare internal signals here and set flag for top module
-							if (dataParity_reg != parity)
-								parityMatch = 1'b1; //they don't match, set seven seg off
-							else
-								parityMatch = 1'b0;
-							state_next = stop;
-						end
-					else
-						s_next = s_reg + 1;
          stop:
             if (s_tick)
                if (s_reg==(SB_TICK-1))
